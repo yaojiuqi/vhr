@@ -5,6 +5,13 @@
 
 <mapper namespace="com.yjq.vhr.mapper.HrMapper">
     <select id="loadUserByUsername" resultType="com.yjq.vhr.model.Hr">
-        select * from hr where username = #{username};
+        select *
+        from hr
+        where username = #{username};
+    </select>
+    <select id="getHrRolesByHrId" resultType="com.yjq.vhr.model.Role">
+        select r.* from role r
+        LEFT JOIN hr_role hr ON r.id = hr.rid
+        WHERE hr.hrid = #{id}
     </select>
 </mapper>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yjq.vhr.mapper.PositionMapper">
+    <select id="getAll" resultType="com.yjq.vhr.model.Position">
+        select * from position
+    </select>
+    <delete id="deleteById" parameterType="Integer">
+        delete from position where id=#{id}
+    </delete>
+    <update id="update" parameterType="com.yjq.vhr.model.Position">
+        update position set name = #{name} where  id = #{id}
+    </update>
+    <insert id="save" parameterType="com.yjq.vhr.model.Position">
+        insert into position (name) values(#{name})
+    </insert>
+    <delete id="deleteByIds">
+        delete from position where id in 
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

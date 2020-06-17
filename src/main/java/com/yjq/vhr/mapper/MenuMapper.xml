@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yjq.vhr.mapper.MenuMapper">
+    <resultMap id="BaseResultMap" type="com.yjq.vhr.model.Menu">
+        <id column="id" property="id"/>
+        <result column="url" property="url"/>
+        <result column="path" property="path"/>
+        <result column="component" property="component"/>
+        <result column="name" property="name"/>
+        <result column="iconCls" property="iconCls"/>
+        <result column="parentId" property="parentId"/>
+        <result column="enabled" property="enabled"/>
+        <association property="meta" javaType="com.yjq.vhr.model.Meta">
+            <result column="keepAlive" property="keepAlive"/>
+            <result column="requireAuth" property="requireAuth"/>
+        </association>
+    </resultMap>
+    <resultMap id="ResultMapChildren" type="com.yjq.vhr.model.Menu" extends="BaseResultMap">
+        <collection property="children" ofType="com.yjq.vhr.model.Menu">
+            <id column="id1" property="id"/>
+            <result column="url1" property="url"/>
+            <result column="path1" property="path"/>
+            <result column="component1" property="component"/>
+            <result column="name1" property="name"/>
+            <result column="iconCls1" property="iconCls"/>
+            <result column="parentId1" property="parentId"/>
+            <result column="enabled1" property="enabled"/>
+            <association property="meta" javaType="com.yjq.vhr.model.Meta">
+                <result column="keepAlive1" property="keepAlive"/>
+                <result column="requireAuth1" property="requireAuth"/>
+            </association>
+        </collection>
+    </resultMap>
+    <resultMap id="ResultMapRoles" type="com.yjq.vhr.model.Menu" extends="BaseResultMap">
+        <collection property="roles" ofType="com.yjq.vhr.model.Role">
+            <id property="id" column="rid"/>
+            <result property="name" column="rname"/>
+            <result property="nameZh" column="rnameZh"/>
+        </collection>
+    </resultMap>
+    <resultMap id="ResultMapMenusWithChildren" type="com.yjq.vhr.model.Menu">
+        <id property="id" column="id1"/>
+        <result property="name" column="name1"/>
+        <collection property="children" column="children" ofType="com.yjq.vhr.model.Menu">
+            <id property="id" column="id2"/>
+            <result property="name" column="name2"/>
+            <collection property="children" column="children" ofType="com.yjq.vhr.model.Menu">
+                <id property="id" column="id3"/>
+                <result property="name" column="name3"/>
+            </collection>
+        </collection>
+    </resultMap>
+    <select id="getMenusByHrId" resultMap="ResultMapChildren">
+        SELECT DISTINCT m1.*,m2.id as id1,m2.url as url1,m2.path as path1,m2.component as component1,m2.`name` as name1,m2.iconCls as iconCls1,m2.keepAlive as keepAlive1,m2.requireAuth as requireAuth1,m2.parentId as parentId1,m2.enabled as enabled1
+        FROM menu m1
+        LEFT JOIN menu m2 ON m1.id = m2.parentId
+        LEFT JOIN menu_role mr ON m2.id=mr.mid
+        LEFT JOIN hr_role hrr ON mr.rid=hrr.rid
+        WHERE hrr.hrid = #{hrid}
+        ORDER BY m1.id ASC,m1.parentId ASC
+    </select>
+    <select id="getAllMenusWithRole" resultMap="ResultMapRoles">
+        SELECT m.*,r.id as rid, r.`name` as rname,r.nameZh as rnameZh
+        FROM menu m
+        INNER JOIN menu_role mr ON m.id = mr.mid
+        INNER JOIN role r ON mr.rid = r.id
+        ORDER BY m.id
+    </select>
+    <select id="getAllMenus" resultMap="ResultMapMenusWithChildren">
+        SELECT m1.id as id1,m1.name as name1,m2.id as id2,m2.name as name2,m3.id as id3,m3.name as name3 FROM menu m1
+        LEFT JOIN menu m2 ON m1.id=m2.parentId
+        LEFT JOIN menu m3 ON m2.id=m3.parentId
+        WHERE m1.id=1 AND m3.enabled = TRUE
+        ORDER BY m1.id,m2.id,m3.id
+    </select>
+    <select id="getSelectMenuIds" resultType="java.lang.Integer">
+        select mid from menu_role where rid = #{id}
+    </select>
+</mapper>
